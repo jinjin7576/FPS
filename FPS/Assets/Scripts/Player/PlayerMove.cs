@@ -6,6 +6,8 @@ public class PlayerMove : MonoBehaviour
     public float jumpPower = 10f;
     bool isJump = false;
 
+    int hp = 100;
+
     CharacterController cc;
 
     //중력 변수
@@ -44,5 +46,10 @@ public class PlayerMove : MonoBehaviour
             yVelocity = jumpPower;
             isJump = true;
         }
+    }
+
+    public void DamageAction(int damage)
+    {
+        hp -= damage;
     }
 }

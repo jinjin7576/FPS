@@ -1,0 +1,136 @@
+using UnityEngine;
+
+public class EnemyFSM : MonoBehaviour
+{
+    enum EnemyState
+    {
+        Idle,
+        Move,
+        Attack,
+        Return,
+        Damage,
+        Die,
+    }
+    EnemyState m_State;
+
+    public float findDistance = 8f;
+
+    Transform player;
+
+    public float attackDistance = 2f;
+
+    public float moveSpeed = 5f;
+
+    CharacterController cc;
+
+    float currentTime = 0;
+    float attackDelay = 2f;
+
+    public int attackPower = 3;
+
+    Vector3 originPos;
+    public float moveDistance = 20f;
+
+    int hp = 100;
+    private int maxHp = 100;
+
+    private void Start()
+    {
+        m_State = EnemyState.Idle;
+
+        player = GameObject.Find("Player").transform;
+        cc = gameObject.GetComponent<CharacterController>();
+
+        originPos = transform.position;
+        hp = maxHp;
+    }
+
+    private void Update()
+    {
+        switch (m_State)
+        {
+            case EnemyState.Idle:
+                Idle();
+                break;
+            case EnemyState.Move:
+                Move();
+                break;
+            case EnemyState.Attack:
+                Attack();
+                break;
+            case EnemyState.Return:
+                Return();
+                break;
+            case EnemyState.Damage:
+                Damage();
+                break;
+            case EnemyState.Die:
+                Die();
+                break;
+        }
+    }
+    void Idle()
+    {
+        if (Vector3.Distance(transform.position, player.position) < findDistance)
+        {
+            m_State = EnemyState.Move;
+            print("상태 전환 : Idle -> Move");
+        }
+    }
+    void Move()
+    {
+        Vector3 dir = (player.position - transform.position).normalized;
+        cc.Move(dir * moveSpeed * Time.deltaTime);
+        //첫타는 빠르게
+        currentTime = attackDelay;
+        if (Vector3.Distance(transform.position, originPos) > moveDistance)
+        {
+            m_State = EnemyState.Return;
+            print("상태 전환 : move -> return");
+        }
+        else if (Vector3.Distance(player.position, transform.position) < attackDistance)
+        {
+            m_State = EnemyState.Attack;
+        }
+    }
+    void Attack()
+    {
+
+        if (Vector3.Distance(transform.position,player.position) < attackDistance)
+        {
+            currentTime += Time.deltaTime;
+            if(currentTime > attackDelay)
+            {
+                print("공격");
+                player.GetComponent<PlayerMove>().DamageAction(attackPower);
+                currentTime = 0;
+            }
+        }
+        else
+        {
+            m_State = EnemyState.Move;
+            print("상태전환 : attack -> move");
+            currentTime = 0;
+        }
+    }
+    void Return()
+    {
+        Vector3 dir = (originPos - transform.position).normalized;
+        cc.Move(dir * moveSpeed * Time.deltaTime);
+        if(Vector3.Distance(originPos, transform.position) < 0.1f)
+        {
+            transform.position = originPos;
+
+            hp = maxHp;
+            m_State = EnemyState.Idle;
+        }
+    }
+    void Damage()
+    {
+
+    }
+    void Die()
+    {
+
+    }
+}
