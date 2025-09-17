@@ -28,6 +28,7 @@ public class PlayerFire : MonoBehaviour
         }
         if (Input.GetMouseButtonDown(0))
         {
+            Debug.Log("shoot");
             Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
 
             RaycastHit hitInfo = new RaycastHit();
@@ -35,6 +36,9 @@ public class PlayerFire : MonoBehaviour
             if (Physics.Raycast(ray, out hitInfo))
             {
                 bulletEffect.transform.position = hitInfo.point;
+
+                bulletEffect.transform.forward = hitInfo.normal;
+
                 ps.Play();
             }
         }
