@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyFSM : MonoBehaviour
 {
@@ -34,6 +35,7 @@ public class EnemyFSM : MonoBehaviour
 
     int hp = 15;
     private int maxHp = 15;
+    public Slider hpBar;
 
     private void Start()
     {
@@ -69,6 +71,7 @@ public class EnemyFSM : MonoBehaviour
                 Die();
                 break;
         }
+        hpBar.value = (float)hp / (float)maxHp;
     }
     void Idle()
     {

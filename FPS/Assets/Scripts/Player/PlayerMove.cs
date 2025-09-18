@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -6,20 +8,28 @@ public class PlayerMove : MonoBehaviour
     public float jumpPower = 10f;
     bool isJump = false;
 
-    int hp = 100;
-
     CharacterController cc;
 
     //중력 변수
     float gravity = -20f;
     //수직 속력 변수
     float yVelocity = 0;
+
+    //체력바 ui
+    public Slider hpBar;
+    int maxHp = 20;
+    public int hp = 20;
+
+    //피격 효과
+    public GameObject hitEffect;
     private void Start()
     {
         cc = gameObject.GetComponent<CharacterController>();
     }
     private void Update()
     {
+        hpBar.value = (float)hp / (float)maxHp;
+
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
@@ -47,9 +57,18 @@ public class PlayerMove : MonoBehaviour
             isJump = true;
         }
     }
-
     public void DamageAction(int damage)
     {
         hp -= damage;
+        if(hp > 0)
+        {
+            StartCoroutine(PlayerHitEffect());
+        }
+    }
+    IEnumerator PlayerHitEffect()
+    {
+        hitEffect.SetActive(true);
+        yield return new WaitForSeconds(0.3f);
+        hitEffect.SetActive(false);
     }
 }
