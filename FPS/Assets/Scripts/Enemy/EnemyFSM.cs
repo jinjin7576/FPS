@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class EnemyFSM : MonoBehaviour
@@ -31,8 +32,8 @@ public class EnemyFSM : MonoBehaviour
     Vector3 originPos;
     public float moveDistance = 20f;
 
-    int hp = 100;
-    private int maxHp = 100;
+    int hp = 15;
+    private int maxHp = 15;
 
     private void Start()
     {
@@ -127,7 +128,30 @@ public class EnemyFSM : MonoBehaviour
     }
     void Damage()
     {
+        StartCoroutine(DamageProcess());
+    }
+    IEnumerator DamageProcess()
+    {
+        yield return new WaitForSeconds(0.5f);
 
+        m_State = EnemyState.Move;
+        print("상태전환 : Damaged -> Move");
+    }
+    public void HitEnemy(int hitPower)
+    {
+        hp -= hitPower;
+        if(hp > 0)
+        {
+            m_State = EnemyState.Damage;
+            print("상태전환 : Any state -> Damage");
+            Damage();
+        }
+        else
+        {
+            m_State = EnemyState.Die;
+            print("상태 전환 : Any state -> Die");
+            Die();
+        }
     }
     void Die()
     {
