@@ -24,6 +24,7 @@ public class EnemyFSM : MonoBehaviour
     public float moveSpeed = 5f;
 
     CharacterController cc;
+    Animator ani;
 
     float currentTime = 0;
     float attackDelay = 2f;
@@ -31,6 +32,7 @@ public class EnemyFSM : MonoBehaviour
     public int attackPower = 3;
 
     Vector3 originPos;
+    Vector3 originRot;
     public float moveDistance = 20f;
 
     int hp = 15;
@@ -43,8 +45,10 @@ public class EnemyFSM : MonoBehaviour
 
         player = GameObject.Find("Player").transform;
         cc = gameObject.GetComponent<CharacterController>();
+        ani = gameObject.GetComponentInChildren<Animator>();
 
         originPos = transform.position;
+        originRot = transform.eulerAngles;
         hp = maxHp;
     }
 
@@ -78,6 +82,7 @@ public class EnemyFSM : MonoBehaviour
         if (Vector3.Distance(transform.position, player.position) < findDistance)
         {
             m_State = EnemyState.Move;
+            ani.SetTrigger("IdleToMove");
             print("상태 전환 : Idle -> Move");
         }
     }
@@ -85,8 +90,13 @@ public class EnemyFSM : MonoBehaviour
     {
         Vector3 dir = (player.position - transform.position).normalized;
         cc.Move(dir * moveSpeed * Time.deltaTime);
+
+        //이동 방향으로 바라보게
+        transform.forward = dir;
+
         //첫타는 빠르게
         currentTime = attackDelay;
+
         if (Vector3.Distance(transform.position, originPos) > moveDistance)
         {
             m_State = EnemyState.Return;
@@ -94,6 +104,7 @@ public class EnemyFSM : MonoBehaviour
         }
         else if (Vector3.Distance(player.position, transform.position) < attackDistance)
         {
+            ani.SetTrigger("MoveToAttackDelay");
             m_State = EnemyState.Attack;
         }
     }
@@ -106,29 +117,39 @@ public class EnemyFSM : MonoBehaviour
             if(currentTime > attackDelay)
             {
                 print("공격");
-                player.GetComponent<PlayerMove>().DamageAction(attackPower);
-                currentTime = 0;
+                ani.SetTrigger("StartAttack"); //애니메이션 이벤트에서 공격 실행
             }
         }
         else
         {
             m_State = EnemyState.Move;
+            ani.SetTrigger("AttackToMove");
             print("상태전환 : attack -> move");
             currentTime = 0;
         }
+    }
+    public void AttackAction()
+    {
+        player.GetComponent<PlayerMove>().DamageAction(attackPower);
+        currentTime = 0;
     }
     void Return()
     {
         Vector3 dir = (originPos - transform.position).normalized;
         cc.Move(dir * moveSpeed * Time.deltaTime);
-        if(Vector3.Distance(originPos, transform.position) < 0.1f)
+        //이동 방향으로 바라보게
+        transform.forward = dir;
+        if (Vector3.Distance(originPos, transform.position) < 0.1f)
         {
             transform.position = originPos;
+            transform.rotation = Quaternion.Euler(originRot);
 
             hp = maxHp;
+            ani.SetTrigger("MoveToIdle");
             m_State = EnemyState.Idle;
         }
     }
+
     void Damage()
     {
         StartCoroutine(DamageProcess());

@@ -28,6 +28,11 @@ public class PlayerMove : MonoBehaviour
     }
     private void Update()
     {
+        if(GameManager.gm.gState != GameManager.GameState.Run)
+        {
+            return;
+        }
+
         hpBar.value = (float)hp / (float)maxHp;
 
         float h = Input.GetAxis("Horizontal");
@@ -57,6 +62,7 @@ public class PlayerMove : MonoBehaviour
             isJump = true;
         }
     }
+
     public void DamageAction(int damage)
     {
         hp -= damage;
