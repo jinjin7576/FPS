@@ -9,6 +9,7 @@ public class PlayerMove : MonoBehaviour
     bool isJump = false;
 
     CharacterController cc;
+    Animator ani;
 
     //중력 변수
     float gravity = -20f;
@@ -25,10 +26,11 @@ public class PlayerMove : MonoBehaviour
     private void Start()
     {
         cc = gameObject.GetComponent<CharacterController>();
+        ani = gameObject.GetComponentInChildren<Animator>();
     }
     private void Update()
     {
-        if(GameManager.gm.gState != GameManager.GameState.Run)
+        if (GameManager.gm.gState != GameManager.GameState.Run)
         {
             return;
         }
@@ -39,23 +41,30 @@ public class PlayerMove : MonoBehaviour
         float v = Input.GetAxis("Vertical");
 
         Vector3 dir = new Vector3(h, 0, v);
-
         dir = dir.normalized;
 
-        //로컬 좌표 이동
+        // 이동 상태 애니메이션 업데이트
+        float moveMagnitude = dir.magnitude;
+
+        // 이동 중일 때는 1, 아니면 0
+        ani.SetFloat("MoveMotion", moveMagnitude > 0 ? 1f : 0f);
+
+        // 로컬 좌표 이동
         dir = Camera.main.transform.TransformDirection(dir);
 
         yVelocity += gravity * Time.deltaTime;
         dir.y = yVelocity;
 
-        //로컬로 바꿔준 방향을 넣어줌
+        // 로컬로 바꿔준 방향을 넣어줌
         cc.Move(dir * moveSpeed * Time.deltaTime);
+
         if (isJump && cc.collisionFlags == CollisionFlags.Below)
         {
             isJump = false;
-            //캐릭터 수직 속도를 0으로 만들기 (누적되는 수적속도 문제 해결)
+            // 캐릭터 수직 속도를 0으로 만들기 (누적되는 수적속도 문제 해결)
             yVelocity = 0;
         }
+
         if (Input.GetButtonDown("Jump") && !isJump)
         {
             yVelocity = jumpPower;

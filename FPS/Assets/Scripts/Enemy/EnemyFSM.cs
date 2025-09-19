@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.AI;
 
 public class EnemyFSM : MonoBehaviour
 {
@@ -24,7 +25,8 @@ public class EnemyFSM : MonoBehaviour
     public float moveSpeed = 5f;
 
     CharacterController cc;
-    Animator ani;
+    NavMeshAgent agent;
+    public Animator ani;
 
     float currentTime = 0;
     float attackDelay = 2f;
@@ -35,7 +37,7 @@ public class EnemyFSM : MonoBehaviour
     Vector3 originRot;
     public float moveDistance = 20f;
 
-    int hp = 15;
+    public int hp = 15;
     private int maxHp = 15;
     public Slider hpBar;
 
@@ -44,6 +46,8 @@ public class EnemyFSM : MonoBehaviour
         m_State = EnemyState.Idle;
 
         player = GameObject.Find("Player").transform;
+
+        agent = GetComponent<NavMeshAgent>();
         cc = gameObject.GetComponent<CharacterController>();
         ani = gameObject.GetComponentInChildren<Animator>();
 
@@ -179,6 +183,7 @@ public class EnemyFSM : MonoBehaviour
         {
             m_State = EnemyState.Die;
             print("상태 전환 : Any state -> Die");
+            ani.SetTrigger("Die");
             Die();
         }
     }

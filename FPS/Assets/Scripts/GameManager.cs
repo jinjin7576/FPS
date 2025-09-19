@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
             gameText.text = "Game Over";
             gameText.color = Color.red;
             gState = GameState.GameOver;
+            player.GetComponentInChildren<Animator>().SetFloat("MoveMotion",0f);
         }
     }
 }
